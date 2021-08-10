@@ -33,8 +33,6 @@ class ZombieDie:
         self._last_roll = random.choice(self._faces)
         return self._last_roll
 
-    def get_last_roll(self):
-        return self._last_roll
 
 # Stolen -- turns numbers into their ordinal, e.g. ordinal(3) --> '3rd'   
 ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4])
@@ -52,30 +50,74 @@ class RoundState:
         self._brain_count = 0
         self._roll_number = 0
         self._new_round = True
-        self._tutorial = False
-
-    def got_shot(self):
-        self._shotgun_count += 1
-    
-    def eat_brains(self):
-        self._brain_count += 1
-
-    def stop_playing(self):
-        self._new_round = False
+        self._tutorial = None
 
     def display_instructions(self):
         if self._tutorial:
             self._tutorial = False
-            return None
-        answer = ''
-        while answer.lower() not in ('y', 'yes', 'n', 'no'):
-            answer = input('Are you new to Zombie Dice?: (y/n) ')
-            if answer.lower() in ('y', 'yes'):
-                self._tutorial = True            
+        elif self._tutorial is None:
+            answer = ''
+            while answer.lower() not in ('y', 'yes', 'n', 'no'):
+                answer = input('Are you new to Zombie Dice?: (y/n) ')
+                if answer.lower() in ('y', 'yes'):
+                    self._tutorial = True
+                elif answer.lower() in ('n', 'no'):
+                    self._tutorial = False
+                else:
+                    continue
+        else:
+            pass
+    
+    def update_dice_counters(self):
+        self._remaining_dice_counter = Counter(self._remianing_dice)
+        self._current_dice_counter = Counter(self._remaining_dice_counter)
+    
+    def print_current_dice(self):
+        for color, count in self._current_dice_counter:
+            cprint(f'{count} {color} {(lambda count: "die" if count == 1 else "dice")(count)}', color)
+            time.sleep(0.25)
+
+    def print_remaining_dice(self):
+        for color, count in self._remaining_dice_counter:
+            cprint(f'{count} {color} {(lambda count: "die" if count == 1 else "dice")(count)}', color)
+            time.sleep(0.25)
+
+    def roll_all_dice(self):
+        for index, die in enumerate(self._current_dice):
+            die.roll()
+            if die._last_roll == 'shotgun':
+                self._shotgun_count += 1
+                background_color = 'on_red'
+            elif die._last_roll == 'brains':
+                self._brain_count += 1
+                background_color = 'on_blue'
+            else:
+                background_color = None
+            cprint(f'{ordinal(index + 1)} {die._color} die rolled ', end = '')
+            cprint(f'{die._last_roll}', on_color = background_color)
+            time.sleep(1)
 
     def take_turn(self):
+        # Update game state
         self._roll_number += 1
         while len(self._current_dice) < 3:
             self._current_dice.append(self._remaining_dice[random.randint(0, len(self._remaining_dice) - 1)])
+        self.update_dice_counters()
+
+        # Update the player
         print('Here we go!')
-        
+        time.sleep(0.75)
+        print(f'This is your {ordinal(self._roll_number)} roll this round.')
+        time.sleep(0.75)
+        print('You\'re rolling:')
+        time.sleep(0.25)
+        self.print_current_dice()
+
+        # Rolling the dice
+        time.sleep(1) 
+        print('\nYou rolled', end = '')
+        for i in range(4):
+            print('.', end = '')
+            time.sleep(0.5)
+        print(' ')
+        self.roll_all_dice()
