@@ -10,7 +10,7 @@
 
 import random
 import time
-from termcolor import cprint
+# from termcolor import cprint
 from collections import Counter
 
 ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4])
@@ -57,13 +57,11 @@ class Instructions:
             self.run_tutorial = False
 
 class Game:
-    self.player_list = []
-
     def get_players(self):
         all_aboard = False
         unique_name = True
         while not all_aboard:
-            new_player_name = input('What is Player {len(self.player_list) + 1}\'s name?')
+            new_player_name = input(f'What is Player {len(self.player_list) + 1}\'s name? ')
             for player in self.player_list:
                 if player.name == new_player_name:
                     unique_name = False
@@ -84,5 +82,9 @@ class Game:
                     break
 
     def __init__(self):
+        self.player_list = []
         self.round_number = 0
         self.get_players()
+
+if __name__ == '__main__':
+    Game()
