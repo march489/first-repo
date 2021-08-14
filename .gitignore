@@ -2,3 +2,4 @@ logs/
 bin/
 *.toml
 *.lock
+__pycache__*
