@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""" zombiedice.py --
+""" zombiedice_script.py --
     This simulates playing the Zombie Dice game. 
     See the rules online for how to play.
     

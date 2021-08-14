@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""" zombiedice_3.py --
+""" zombiedice.py --
     This simulates playing the Zombie Dice game. 
     See the rules online for how to play.
     
@@ -36,7 +36,10 @@ class Player:
         self.name = name
         self.score = 0
 
-class RoundState:
+    def __repr__(self):
+        return f'Player: {self.name}'
+
+class TurnState:
     def __init__(self, round_number: int, player: Player):
         self.remaining_dice = [
             ZombieDie('green'), ZombieDie('green'), ZombieDie('green'),
@@ -58,39 +61,45 @@ class Instructions:
 
 class Game:
     def get_players(self):
+        # Gets the names of the people playing the game, adds them to the player list
         all_aboard = False
-        unique_name = True
         while not all_aboard:
-            new_player_name = input(f'What is Player {len(self.player_list) + 1}\'s name? ')
-            try:
-                self.check_unique_name(new_player_name)
-                self.player_list.append(Player(new_player_name))
-            except ValueError:
-                print('Someone with that name is already playing.')
-                time.sleep(0.25)
-                print('Please choose another name.')
-                continue
-            more_players = ''
-            while not more_players:
-                more_players = input('Is anyone else playing? (y/n): ')
-                if more_players not in ('yes', 'y', 'no', 'n'):
-                    continue
-                elif more_players in ('no', 'n'):
-                    all_aboard = True
-                else:
-                    break
-
-    def check_unique_name(self, name):
-        for player in self.player_list:
-            if name == player.name:
-                raise ValueError
+            new_player_name = input(f'What is Player {len(self.player_list)+ 1}\'s name? ')
+            if self.check_valid_name(new_player_name):
+                self.player_list.append(Player(new_player_name.strip()))
+                self.player_name_list.append(new_player_name.lower().strip())
             else:
-                pass
+                print(' ')
+                time.sleep(0.5)
+                print(f'Error: That name is already taken. Please choose a unique name.' + '\n')
+                continue
+
+            more_people = ''
+            while more_people.lower() not in ('y', 'yes', 'n', 'no'):
+                more_people = input('Does anyone else want to play? (y/n): ')
+                if more_people.lower() in ('n', 'no'):
+                    all_aboard = True
+                    print('Great! Let\'s get started!')
+                    break
+                elif more_people.lower() in ('y', 'yes'):
+                    print('The more the merrier!')
+                    break
+                else:
+                    continue
+
+    def check_valid_name(self, potential_name: str):
+        # Checks if the name just input is valid
+        tmp = potential_name.lower().strip()
+        for player_name in self.player_name_list:
+            if tmp == player_name:
+                return False
+        return True
+
+    
 
     def __init__(self):
-        self.player_list = []
         self.round_number = 0
-        self.get_players()
-
-# if __name__ == '__main__':
-#     Game()
+        self.active_player = 0
+        self.player_list = []
+        self.player_name_list = []
+        
